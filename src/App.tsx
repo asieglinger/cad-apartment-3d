@@ -66,9 +66,9 @@ const WALLS: WallData[] = [
 
   // Pantry Walls (Next to Kitchen)
   { start: [18.5, 4], end: [15.5, 4] },
-  { start: [15.5, 4], end: [15.5, 5.5] },
-  { start: [15.5, 5.5], end: [17, 7], height: 2, elevation: 7 }, // Pantry door gap
-  { start: [17, 7], end: [18.5, 7] },
+  { start: [15.5, 4], end: [15.5, 7] },
+  { start: [15.5, 7], end: [17.6, 7], height: 2, elevation: 7 }, // Pantry door gap
+  { start: [17.6, 7], end: [18.5, 7] },
 
   // Bedroom Closet
   { start: [26.58, 15.91], end: [37.66, 15.91] },
@@ -237,16 +237,16 @@ function BuiltIns() {
       </mesh>
 
       {/* Doors */}
-      <Door position={[3, 3.5, 31.08]} rotation={[0, -Math.PI / 3, 0]} width={3} /> {/* Entrance */}
-      <Door position={[23, 3.5, 4]} rotation={[0, Math.PI - Math.PI / 4, 0]} width={3} /> {/* Bathroom */}
+      <Door position={[3, 3.5, 31.08]} rotation={[0, 0, 0]} width={3} /> {/* Entrance */}
+      <Door position={[20, 3.5, 4]} rotation={[0, 0, 0]} width={3} /> {/* Bathroom */}
       
       {/* Pantry Door */}
-      <Door position={[16.25, 3.5, 6.25]} rotation={[0, -Math.PI / 4, 0]} width={2.1} />
+      <Door position={[15.5, 3.5, 7]} rotation={[0, 0, 0]} width={2.1} />
 
       {/* Hallway Closet Doors */}
-      <Door position={[3, 3.5, 20.25]} rotation={[0, Math.PI / 6, 0]} width={2.5} color="#e5e7eb" /> {/* Coat Closet */}
-      <Door position={[3, 3.5, 24.25]} rotation={[0, Math.PI / 6, 0]} width={2.5} color="#e5e7eb" /> {/* Water Heater */}
-      <Door position={[3, 3.5, 28.75]} rotation={[0, Math.PI / 6, 0]} width={3.5} color="#e5e7eb" /> {/* Washer/Dryer */}
+      <Door position={[3, 3.5, 19]} rotation={[0, Math.PI / 2, 0]} width={2.5} color="#e5e7eb" /> {/* Coat Closet */}
+      <Door position={[3, 3.5, 23]} rotation={[0, Math.PI / 2, 0]} width={2.5} color="#e5e7eb" /> {/* Water Heater */}
+      <Door position={[3, 3.5, 27]} rotation={[0, Math.PI / 2, 0]} width={3.5} color="#e5e7eb" /> {/* Washer/Dryer */}
     </group>
   );
 }
@@ -320,6 +320,20 @@ interface FurnitureItem {
 
 const COLORS = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
 
+const PRESETS = [
+  { name: 'Couch', w: '84', d: '36', h: '32' },
+  { name: 'Sectional Couch', w: '108', d: '84', h: '32' },
+  { name: 'Desk', w: '48', d: '24', h: '30' },
+  { name: 'Chair', w: '24', d: '24', h: '32' },
+  { name: 'King Bed', w: '76', d: '80', h: '24' },
+  { name: 'Queen Bed', w: '60', d: '80', h: '24' },
+  { name: 'Twin Bed', w: '38', d: '75', h: '24' },
+  { name: 'Nightstand', w: '24', d: '18', h: '24' },
+  { name: 'Bookshelf', w: '36', d: '12', h: '72' },
+  { name: 'Dresser', w: '60', d: '20', h: '36' },
+  { name: 'Custom', w: '24', d: '24', h: '24' },
+];
+
 function FurnitureMesh({ 
   item, 
   isSelected, 
@@ -337,49 +351,45 @@ function FurnitureMesh({
   const h = item.height * INCHES_TO_FEET;
   const d = item.depth * INCHES_TO_FEET;
 
-  const content = (
-    <mesh 
-      ref={meshRef}
-      position={[item.position[0], h / 2, item.position[2]]} 
-      rotation={item.rotation as any}
-      onClick={(e) => { e.stopPropagation(); onSelect(); }}
-      castShadow
-      receiveShadow
-    >
-      <boxGeometry args={[w, h, d]} />
-      <meshStandardMaterial 
-        color={item.color} 
-        roughness={0.6}
-      />
-      <lineSegments>
-        <edgesGeometry args={[new THREE.BoxGeometry(w, h, d)]} />
-        <lineBasicMaterial color={isSelected ? 'white' : 'black'} linewidth={isSelected ? 3 : 1} />
-      </lineSegments>
-    </mesh>
-  );
-
-  if (isSelected) {
-    return (
-      <TransformControls 
-        object={meshRef as any} 
-        mode="translate"
-        showY={false}
-        onObjectChange={() => {
-          if (meshRef.current) {
-            onUpdate(item.id, [
-              meshRef.current.position.x,
-              item.position[1],
-              meshRef.current.position.z
-            ]);
-          }
-        }}
+  return (
+    <>
+      <mesh 
+        ref={meshRef}
+        position={[item.position[0], h / 2, item.position[2]]} 
+        rotation={item.rotation as any}
+        onClick={(e) => { e.stopPropagation(); onSelect(); }}
+        castShadow
+        receiveShadow
       >
-        {content}
-      </TransformControls>
-    );
-  }
-
-  return content;
+        <boxGeometry args={[w, h, d]} />
+        <meshStandardMaterial 
+          color={item.color} 
+          roughness={0.6}
+        />
+        <lineSegments>
+          <edgesGeometry args={[new THREE.BoxGeometry(w, h, d)]} />
+          <lineBasicMaterial color={isSelected ? 'white' : 'black'} linewidth={isSelected ? 3 : 1} />
+        </lineSegments>
+      </mesh>
+      
+      {isSelected && (
+        <TransformControls 
+          object={meshRef as any} 
+          mode="translate"
+          showY={false}
+          onObjectChange={() => {
+            if (meshRef.current) {
+              onUpdate(item.id, [
+                meshRef.current.position.x,
+                item.position[1],
+                meshRef.current.position.z
+              ]);
+            }
+          }}
+        />
+      )}
+    </>
+  );
 }
 
 export default function App() {
@@ -387,10 +397,23 @@ export default function App() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showMeasurements, setShowMeasurements] = useState(false);
 
-  const [name, setName] = useState('Sofa');
-  const [width, setWidth] = useState('80');
+  const [preset, setPreset] = useState('Couch');
+  const [name, setName] = useState('Couch');
+  const [width, setWidth] = useState('84');
   const [depth, setWidth2] = useState('36');
   const [height, setHeight] = useState('32');
+
+  const handlePresetChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value;
+    setPreset(val);
+    const p = PRESETS.find(p => p.name === val);
+    if (p) {
+      setName(p.name);
+      setWidth(p.w);
+      setWidth2(p.d);
+      setHeight(p.h);
+    }
+  };
 
   const handleAddItem = (e: React.FormEvent) => {
     e.preventDefault();
@@ -453,6 +476,18 @@ export default function App() {
           <div className="mb-8">
             <h2 className="text-sm font-semibold text-neutral-300 uppercase tracking-wider mb-4">Add Furniture</h2>
             <form onSubmit={handleAddItem} className="space-y-4">
+              <div>
+                <label className="block text-xs text-neutral-400 mb-1">Preset</label>
+                <select 
+                  value={preset} 
+                  onChange={handlePresetChange}
+                  className="w-full bg-neutral-900 border border-neutral-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                >
+                  {PRESETS.map(p => (
+                    <option key={p.name} value={p.name}>{p.name}</option>
+                  ))}
+                </select>
+              </div>
               <div>
                 <label className="block text-xs text-neutral-400 mb-1">Item Name</label>
                 <input 
@@ -593,11 +628,11 @@ export default function App() {
         <div className="absolute top-4 left-4 bg-neutral-900/80 backdrop-blur-sm border border-neutral-800 p-3 rounded-lg pointer-events-none">
           <p className="text-sm text-neutral-300 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-blue-500 inline-block"></span>
-            Drag items to move
+            Click an item to select it, then drag arrows to move
           </p>
           <p className="text-sm text-neutral-300 flex items-center gap-2 mt-1">
             <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
-            Left click + drag to rotate camera
+            Left click empty space to rotate camera
           </p>
         </div>
       </div>
